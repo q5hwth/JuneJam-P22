@@ -1,0 +1,100 @@
+
+pygame.init()
+
+WIDTH, HEIGHT = 800, 600
+SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Game Jam")
+CLOCK = pygame.time.Clock()
+FONT = pygame.font.SysFont("arial", 24)
+
+GRAVITY = 0.8
+ACCELERATION = 0.7
+FRICTION = 0.8
+JUMP_VELOCITY = -14
+MAX_SPEED = 8
+FLOOR = pygame.Rect(0, HEIGHT - 40, WIDTH, 40)
+ENEMY_SPEED = 2.5
+ENEMY_DAMAGE = 10
+SWORD_DAMAGE = 25
+PLAYER_ATTACK_COOLDOWN_FRAMES = 20
+ATTACK_COOLDOWN_FRAMES = 45
+
+class Player:
+	def __init__(self, x, y):
+		self.rect = pygame.Rect(x, y, 40, 40)
+		self.velocity_x = 0.0
+		self.velocity_y = 0.0
+		self.on_ground = False
+		self.health = 100
+		self.facing = 1
+		self.attack_cooldown_timer = 0
+		self.is_attacking = False
+
+	def handle_input(self):
+		keys = pygame.key.get_pressed()
+		acceleration_x = 0.0
+		self.is_attacking = False
+
+		if keys[pygame.K_a]:
+			acceleration_x -= ACCELERATION
+			self.facing = -1
+		if keys[pygame.K_d]:
+			acceleration_x += ACCELERATION
+			self.facing = 1
+		if keys[pygame.K_w] and self.on_ground:
+			self.velocity_y = JUMP_VELOCITY
+			self.on_ground = False
+		if keys[pygame.K_SPACE] and self.attack_cooldown_timer == 0:
+			self.is_attacking = True
+			self.attack_cooldown_timer = PLAYER_ATTACK_COOLDOWN_FRAMES
+
+		self.velocity_x += acceleration_x
+		if acceleration_x == 0 and self.on_ground:
+			self.velocity_x *= FRICTION
+		else:
+			self.velocity_x *= 0.99
+
+		if self.attack_cooldown_timer > 0:
+			self.attack_cooldown_timer -= 1
+
+		if self.velocity_x > MAX_SPEED:
+			self.velocity_x = MAX_SPEED
+		elif self.velocity_x < -MAX_SPEED:
+			self.velocity_x = -MAX_SPEED
+
+		if keys[pygame.K_s] and not self.on_ground:
+			self.velocity_y += 0.4
+
+	def apply_gravity(self):
+		self.velocity_y += GRAVITY
+
+	def move_and_collide(self):
+		self.rect.x += int(self.velocity_x)
+		if self.rect.left < 0:
+			self.rect.left = 0
+			self.velocity_x = 0
+		elif self.rect.right > WIDTH:
+			self.rect.right = WIDTH
+			self.velocity_x = 0
+
+		self.rect.y += int(self.velocity_y)
+		self.on_ground = False
+		if self.rect.colliderect(FLOOR):
+			if self.velocity_y > 0:
+				self.rect.bottom = FLOOR.top
+				self.velocity_y = 0
+				self.on_ground = True
+			elif self.velocity_y < 0:
+				self.rect.top = FLOOR.bottom
+				self.velocity_y = 0
+
+		if self.rect.top < 0:
+			self.rect.top = 0
+			self.velocity_y = 0
+
+	def update(self):
+		self.handle_input()
+		self.apply_gravity()
+		self.move_and_collide()
+
+	def draw(self, surface):
