@@ -1,0 +1,79 @@
+import pygame
+import sys
+import time
+
+# Initialize Pygame
+pygame.init()
+
+# Screen setup
+WIDTH, HEIGHT = 800, 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Wave Timer with Pause")
+
+# Colors
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+RED = (200, 0, 0)
+GREEN = (0, 200, 0)
+
+# Fonts
+font = pygame.font.Font(None, 40)
+
+# Game variables
+start_time = time.time()
+paused_time = 0
+pause_start = 0
+paused = False
+wave_number = 1
+
+# Clock for FPS control
+clock = pygame.time.Clock()
+
+# Pause button rectangle
+pause_button = pygame.Rect(WIDTH - 120, 20, 100, 40)
+
+def draw_text(text, x, y, color=WHITE):
+    """Draw text on the screen."""
+    img = font.render(text, True, color)
+    screen.blit(img, (x, y))
+
+while True:
+    screen.fill(WHITE)
+
+    # Event handling
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            if pause_button.collidepoint(event.pos):
+                if not paused:
+                    paused = True
+                    pause_start = time.time()
+                else:
+                    paused = False
+                    paused_time += time.time() - pause_start
+
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_w:  # Press W to go to next wave
+                wave_number += 1
+
+    # Calculate elapsed time
+    if not paused:
+        elapsed_time = time.time() - start_time - paused_time
+    else:
+        elapsed_time = time.time() - start_time - paused_time
+
+    # Draw timer
+    draw_text(f"Time: {elapsed_time:.1f}s", 20, 20)
+
+    # Draw wave number
+    draw_text(f"Wave: {wave_number}", 20, 60)
+
+    # Draw pause button
+    pygame.draw.rect(screen, RED if paused else GREEN, pause_button)
+    draw_text("Pause" if not paused else "Resume", pause_button.x + 5, pause_button.y + 5)
+
+    pygame.display.flip()
+    clock.tick(60)
