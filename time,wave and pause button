@@ -77,15 +77,3 @@ while True:
 
     pygame.display.flip()
     clock.tick(60)
-How it works
-Timer: Uses time.time() to track elapsed seconds, subtracting paused time.
-Wave number: Starts at 1, increases when you press W.
-Pause button: Click the button in the top-right to pause/resume.
-FPS control: clock.tick(60) keeps the game running at 60 FPS.
-Controls
-Click Pause/Resume button → Pause or resume the game.
-Press W → Increase wave number.
-Close window → Exit game.
-If you want, I can add a countdown timer instead of elapsed time so it feels more like a survival wave game.
-Do you want me to make that upgrade?
-
