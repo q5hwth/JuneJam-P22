@@ -38,7 +38,7 @@ def draw_text(text, x, y, color=WHITE):
     screen.blit(img, (x, y))
 
 while True:
-    screen.fill(BLACK)
+    screen.fill(WHITE)
 
     # Event handling
     for event in pygame.event.get():
